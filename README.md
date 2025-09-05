@@ -7,13 +7,6 @@ from peft import PeftModel
 from transformers import StoppingCriteria, StoppingCriteriaList
 from transformers import TextStreamer
 import os,sys,re,random,json,glob 
-import spacy
-import multiprocessing
-import time
-from multi_rake import Rake
-
-
-rake = Rake()
 
 
 
@@ -77,54 +70,6 @@ def generate(prompt):
     )
     return tokenizer.decode(out[0], skip_special_tokens=True)
 
-
-def extract_all_tags(text):
-    
-    filter = 10.0
-    keys = rake.apply(text.replace("\n",'').replace("\t",''))
-    keywords = []
-    while(len(keywords) == 0 and filter > 1.0):
-        for k in keys:
-            if(k[1] > filter):
-                if(k[0] not in keywords):
-                    keywords.append(k[0])
-                    tagdb["keywords"].append(k[0])
-        filter = filter / 2.0
-
-    hashtags = re.findall(r'[#]\w+', text)
-    tweets = re.findall(r'[@]\w+', text)
-    visuals = re.findall(r'[\+]\[A-Za-z]\w+', text)
-    
-    for i in hashtags:
-        tagdb["hashtags"].append(i)
-    for i in tweets:
-        tagdb["tweets"].append(i)
-    for i in visuals:
-        tagdb["visualtags"].append(i)
-    
-    return hashtags,keywords,tweets,visuals
-    
-
-def tag_text(input):
-   
-    hashtags,keywords,tweettags,visualtags = extract_all_tags(input)
-    
-    x={}
-    x["hashtags"] = []
-    x["keywords"] = []
-    x["tweets"] = []
-    x["visualtags"] = []
-
-    if(len(hashtags) > 0):
-        x["hashtags"] = hashtags
-    if(len(keywords) > 0):
-        x["keywords"] = keywords
-    if(len(tweettags) > 0):
-        x["tweets"] = tweettags
-    if(len(visualtags) > 0):
-        x["visualtags"] = visualtags
-
-    return x
 
 
 while 1:
